@@ -1,6 +1,11 @@
 "use client"
-export async function page(params:Promise<{market:string}>) {
-    const market = params;
-    
-    
+
+import { Marketbar } from "@/components/Marketbar";
+import { useParams } from "next/navigation";
+
+export default function Page() {
+  const { market } = useParams<{ market: string }>();
+  const marketSymbol = decodeURIComponent(market).replaceAll("-", "_").toUpperCase();
+
+  return <Marketbar market={marketSymbol} />;
 }
