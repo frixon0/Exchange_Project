@@ -1,26 +1,32 @@
-import axios from "axios"
 import { depth, KLine, Ticker, trades } from "./types";
+
 const BASE_URL = "http://localhost:3008/api/v1";
+
+async function getJson<T>(path: string): Promise<T> {
+    const res = await fetch(`${BASE_URL}${path}`);
+
+    if (!res.ok) {
+        throw new Error(`Request failed with status ${res.status}`);
+    }
+
+    return res.json();
+}
+
 export async function getTrades(market:string):Promise<trades[]>{
-    const res = await axios.get(BASE_URL+`/trades?symbol=${encodeURIComponent(market)}`);
-    return res.data;
+    return getJson<trades[]>(`/trades?symbol=${encodeURIComponent(market)}`);
 }
 export async function getDepth(market:string):Promise<depth>{
-    const res = await axios.get(BASE_URL+`/depth?symbol=${encodeURIComponent(market)}`);
-    return res.data;
+    return getJson<depth>(`/depth?symbol=${encodeURIComponent(market)}`);
 }
 export async function getticker(market:string):Promise<Ticker>{
-    const res = await axios.get(BASE_URL+`/ticker?symbol=${encodeURIComponent(market)}`);
-    return res.data;
+    return getJson<Ticker>(`/ticker?symbol=${encodeURIComponent(market)}`);
 }
 export async function getklines (starttime:string,endtime:string,market:string):Promise<KLine[]>{
-    const res = await axios.get(BASE_URL+`/klines?symbol=${encodeURIComponent(market)}&intercal=1h&startTime=${starttime}&endTime=${endtime}`);
-    const d:KLine[] = res.data;
-     return d.sort((x, y) => (Number(x.end) < Number(y.end) ? -1 : 1));
+    const d = await getJson<KLine[]>(`/klines?symbol=${encodeURIComponent(market)}&interval=1h&startTime=${starttime}&endTime=${endtime}`);
+     return d.sort((x, y) => Date.parse(x.end) - Date.parse(y.end));
 
 }
 export async function getmarkets()
 {
-    const res = await axios.get(BASE_URL+'/markets');
-    return res.data;
+    return getJson<string[]>('/markets');
 }

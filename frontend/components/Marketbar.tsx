@@ -64,12 +64,12 @@ export const Marketbar = ({ market }: MarketbarProps) => {
   const changeClass = isPositive ? "text-emerald-400" : "text-red-400";
 
   return (
-    <div className="flex min-h-[66px] w-full items-center gap-6 overflow-x-auto rounded-lg border border-[#20212a] bg-[#14151b] px-4 py-3 shadow-sm">
-      <div className="min-w-[150px] shrink-0">
-        <div className="text-sm font-semibold uppercase tracking-wide text-white">
+    <div className="flex min-h-12 w-full items-center gap-5 overflow-x-auto rounded-lg border border-[#20212a] bg-[#14151b] px-3 py-2 shadow-sm">
+      <div className="min-w-32 shrink-0">
+        <div className="text-xs font-semibold uppercase tracking-wide text-white">
           {tickerData?.symbol ?? market}
         </div>
-        <div className="mt-1 text-xl font-bold tabular-nums text-white">
+        <div className="text-lg font-bold tabular-nums text-white">
           {isLoading
             ? "--"
             : formatNumber(tickerData?.lastPrice, {
@@ -81,7 +81,7 @@ export const Marketbar = ({ market }: MarketbarProps) => {
       {error ? (
         <div className="text-sm text-red-300">{error}</div>
       ) : (
-        <div className="flex min-w-max items-center gap-6">
+        <div className="flex min-w-max items-center gap-5">
           <TickerStat
             label="24h Change"
             value={formatPercent(tickerData?.priceChangePercent)}
@@ -125,8 +125,8 @@ const TickerStat = ({
 }) => {
   return (
     <div className="shrink-0">
-      <div className="text-xs text-slate-400">{label}</div>
-      <div className={`mt-1 text-sm font-semibold tabular-nums ${valueClassName}`}>
+      <div className="text-[11px] leading-3 text-slate-400">{label}</div>
+      <div className={`mt-0.5 text-xs font-semibold tabular-nums ${valueClassName}`}>
         {value}
       </div>
     </div>
