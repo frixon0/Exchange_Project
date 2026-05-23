@@ -1,6 +1,8 @@
 "use client";
 
 import { getDepth } from "@/app/utils/hits";
+import { sigManager } from "@/app/utils/realtiime";
+import { BookTicker, depth } from "@/app/utils/types";
 import { useEffect, useState } from "react";
 
 type OrderbookProps = {
@@ -9,7 +11,7 @@ type OrderbookProps = {
 
 type OrderbookLevel = [price: string, quantity: string];
 
-const MAX_VISIBLE_LEVELS = 9;
+const MAX_VISIBLE_LEVELS = 13;
 
 const sortAsks = (levels: OrderbookLevel[]) => {
   return [...levels].sort((a, b) => Number(a[0]) - Number(b[0]));
@@ -17,6 +19,25 @@ const sortAsks = (levels: OrderbookLevel[]) => {
 
 const sortBids = (levels: OrderbookLevel[]) => {
   return [...levels].sort((a, b) => Number(b[0]) - Number(a[0]));
+};
+
+const applyDepthUpdates = (
+  currentLevels: OrderbookLevel[],
+  updates: OrderbookLevel[] = [],
+  sortLevels: (levels: OrderbookLevel[]) => OrderbookLevel[],
+) => {
+  const levelsByPrice = new Map(currentLevels);
+
+  updates.forEach(([price, quantity]) => {
+    if (Number(quantity) === 0) {
+      levelsByPrice.delete(price);
+      return;
+    }
+
+    levelsByPrice.set(price, quantity);
+  });
+
+  return sortLevels([...levelsByPrice.entries()]);
 };
 
 const formatNumber = (value: string, maximumFractionDigits = 8) => {
@@ -34,19 +55,39 @@ const formatNumber = (value: string, maximumFractionDigits = 8) => {
 export const Orderbook = ({ market }: OrderbookProps) => {
   const [asks, setAsks] = useState<OrderbookLevel[]>([]);
   const [bids, setBids] = useState<OrderbookLevel[]>([]);
+  const [bookTicker, setBookTicker] = useState<Partial<BookTicker>>();
   const [error, setError] = useState<string>();
 
   useEffect(() => {
     let ignore = false;
+    console.info("Orderbook subscribing depth", market);
+
+    sigManager.getInstance().register("depth",  (data: Partial<depth>) => {
+      if (!ignore) {
+        setAsks((currentAsks) =>
+          applyDepthUpdates(currentAsks, data.asks, sortAsks),
+        );
+        setBids((currentBids) =>
+          applyDepthUpdates(currentBids, data.bids, sortBids),
+        );
+        setError(undefined);
+      }
+    }, market);
+    sigManager.getInstance().register("bookTicker",  (data: Partial<BookTicker>) => {
+      if (!ignore) {
+        setBookTicker(data);
+      }
+    }, market);
+    sigManager.getInstance().sendMessage({
+      method: "SUBSCRIBE",
+      params: [`depth.${market}`, `bookTicker.${market}`],
+    });
 
     getDepth(market)
       .then((depth) => {
         if (!ignore) {
-          const sortedAsks = sortAsks(depth.asks);
-          const sortedBids = sortBids(depth.bids);
-
-          setAsks(sortedAsks.slice(0, MAX_VISIBLE_LEVELS).reverse());
-          setBids(sortedBids.slice(0, MAX_VISIBLE_LEVELS));
+          setAsks(sortAsks(depth.asks));
+          setBids(sortBids(depth.bids));
           setError(undefined);
         }
       })
@@ -60,13 +101,21 @@ export const Orderbook = ({ market }: OrderbookProps) => {
 
     return () => {
       ignore = true;
+      sigManager.getInstance().deregister("depth", market);
+      sigManager.getInstance().deregister("bookTicker", market);
+      sigManager.getInstance().sendMessage({
+        method: "UNSUBSCRIBE",
+        params: [`depth.${market}`, `bookTicker.${market}`],
+      });
     };
   }, [market]);
 
-  const bestAsk = asks.at(-1)?.[0];
-  const bestBid = bids.at(0)?.[0];
-  const spread =
-    bestAsk && bestBid ? Math.max(Number(bestAsk) - Number(bestBid), 0) : null;
+  const bestAsk = bookTicker?.askPrice ?? asks.at(0)?.[0];
+  const bestBid = bookTicker?.bidPrice ?? bids.at(0)?.[0];
+  const currentPrice =
+    bestAsk && bestBid ? (Number(bestAsk) + Number(bestBid)) / 2 : null;
+  const visibleAsks = asks.slice(0, MAX_VISIBLE_LEVELS).reverse();
+  const visibleBids = bids.slice(0, MAX_VISIBLE_LEVELS);
 
   return (
     <section className="flex h-full min-h-[360px] w-full max-w-[360px] flex-col rounded-lg border border-[#20212a] bg-[#101116] text-sm text-slate-200 shadow-sm">
@@ -87,18 +136,18 @@ export const Orderbook = ({ market }: OrderbookProps) => {
         </div>
       ) : (
         <div className="flex flex-1 flex-col overflow-hidden">
-          <OrderbookSide levels={asks} side="ask" />
+          <OrderbookSide levels={visibleAsks} side="ask" />
 
           <div className="border-y border-[#20212a] px-3 py-2">
             <div className="flex items-baseline justify-between">
-              <span className="text-xs text-slate-500">Spread</span>
+              <span className="text-xs text-slate-500">Price</span>
               <span className="font-semibold tabular-nums text-white">
-                {spread === null ? "--" : formatNumber(String(spread))}
+                {currentPrice === null ? "--" : formatNumber(String(currentPrice))}
               </span>
             </div>
           </div>
 
-          <OrderbookSide levels={bids} side="bid" />
+          <OrderbookSide levels={visibleBids} side="bid" />
         </div>
       )}
     </section>

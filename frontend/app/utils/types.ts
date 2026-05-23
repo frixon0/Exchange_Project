@@ -35,3 +35,11 @@ export interface Ticker {
     "trades": string,
     "volume": string
 }
+
+export interface BookTicker {
+    askPrice: string;
+    askQuantity: string;
+    bidPrice: string;
+    bidQuantity: string;
+    symbol: string;
+}

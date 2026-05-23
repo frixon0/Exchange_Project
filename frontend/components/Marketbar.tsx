@@ -1,6 +1,7 @@
 "use client"
 
 import { getticker } from "@/app/utils/hits";
+import { sigManager } from "@/app/utils/realtiime";
 import { Ticker } from "@/app/utils/types";
 import { useEffect, useState } from "react";
 
@@ -30,14 +31,33 @@ const formatPercent = (value?: string) => {
 
 export const Marketbar = ({ market }: MarketbarProps) => {
   const [tickerState, setTickerState] = useState<{
-    data?: Ticker;
+    data?: Partial<Ticker>;
     error?: string;
     market?: string;
   }>({});
 
   useEffect(() => {
     let ignore = false;
+    console.info("Marketbar subscribing ticker", market);
 
+    sigManager.getInstance().register("ticker",  (data: Partial<Ticker>) => {
+      if (!ignore) {
+       setTickerState((prevState) => {
+          return { ...prevState, market, data: { ...prevState.data, ...data } };
+        });
+      }
+    }, market); 
+    sigManager.getInstance().register("trade",  (data: Partial<Ticker>) => {
+      if (!ignore) {
+       setTickerState((prevState) => {
+          return { ...prevState, market, data: { ...prevState.data, ...data } };
+        });
+      }
+    }, market); 
+    sigManager.getInstance().sendMessage({
+      "method": "SUBSCRIBE",
+      "params": [`ticker.${market}`, `trade.${market}`]
+    });
     getticker(market)
       .then((data) => {
         if (!ignore) {
@@ -51,7 +71,15 @@ export const Marketbar = ({ market }: MarketbarProps) => {
       });
 
     return () => {
+
       ignore = true;
+      sigManager.getInstance().deregister("ticker", market);
+      sigManager.getInstance().deregister("trade", market);
+      sigManager.getInstance().sendMessage({
+        method: "UNSUBSCRIBE",
+        params: [`ticker.${market}`, `trade.${market}`],
+       
+      });
     };
   }, [market]);
 

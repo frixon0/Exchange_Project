@@ -72,12 +72,10 @@ export class ChartManager {
     this.chart.timeScale().fitContent();
   }
   public update(updatedPrice: ChartCandle & { newCandleInitiated?: boolean; time?: number }) {
-    if (!this.lastUpdateTime) {
-      this.lastUpdateTime = new Date().getTime();
-    }
+    const updateTime = updatedPrice.time ?? updatedPrice.timestamp;
 
     this.candleSeries.update({
-      time: (this.lastUpdateTime / 1000) as UTCTimestamp,
+      time: (updateTime / 1000) as UTCTimestamp,
       close: updatedPrice.close,
       low: updatedPrice.low,
       high: updatedPrice.high,

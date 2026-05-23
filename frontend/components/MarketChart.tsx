@@ -2,6 +2,7 @@
 
 import { getklines } from "@/app/utils/hits";
 import { ChartManager } from "@/app/utils/graph";
+import { sigManager } from "@/app/utils/realtiime";
 import { KLine } from "@/app/utils/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -35,6 +36,29 @@ const toChartCandles = (klines: KLine[]) => {
     });
 };
 
+const toChartCandle = (kline: Partial<KLine>) => {
+  const timestamp = Date.parse(kline.start ?? "");
+  const candle = {
+    timestamp,
+    open: Number(kline.open),
+    high: Number(kline.high),
+    low: Number(kline.low),
+    close: Number(kline.close),
+  };
+
+  if (
+    !Number.isFinite(candle.timestamp) ||
+    !Number.isFinite(candle.open) ||
+    !Number.isFinite(candle.high) ||
+    !Number.isFinite(candle.low) ||
+    !Number.isFinite(candle.close)
+  ) {
+    return null;
+  }
+
+  return candle;
+};
+
 export const MarketChart = ({ market }: MarketChartProps) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartManagerRef = useRef<ChartManager | null>(null);
@@ -46,6 +70,24 @@ export const MarketChart = ({ market }: MarketChartProps) => {
 
   useEffect(() => {
     let ignore = false;
+    const klineStream = `kline.1h.${market}`;
+
+    sigManager.getInstance().register("kline",  (data: Partial<KLine>) => {
+      if (ignore) {
+        return;
+      }
+
+      const candle = toChartCandle(data);
+
+      if (candle) {
+        chartManagerRef.current?.update(candle);
+      }
+    }, klineStream);
+    sigManager.getInstance().sendMessage({
+      method: "SUBSCRIBE",
+      params: [klineStream],
+    });
+
     const end = new Date();
     const start = new Date(end.getTime() - DAYS_TO_LOAD * 24 * 60 * 60 * 1000);
 
@@ -67,6 +109,11 @@ export const MarketChart = ({ market }: MarketChartProps) => {
 
     return () => {
       ignore = true;
+      sigManager.getInstance().deregister("kline", klineStream);
+      sigManager.getInstance().sendMessage({
+        method: "UNSUBSCRIBE",
+        params: [klineStream],
+      });
     };
   }, [market]);
 
