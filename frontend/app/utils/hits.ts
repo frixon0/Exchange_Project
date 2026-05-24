@@ -30,3 +30,7 @@ export async function getmarkets()
 {
     return getJson<string[]>('/markets');
 }
+export async function gettickers()
+{
+    return getJson<Ticker[]>('/tickers');
+}

@@ -11,7 +11,7 @@ type OrderbookProps = {
 
 type OrderbookLevel = [price: string, quantity: string];
 
-const MAX_VISIBLE_LEVELS = 13;
+const MAX_VISIBLE_LEVELS = 12;
 
 const sortAsks = (levels: OrderbookLevel[]) => {
   return [...levels].sort((a, b) => Number(a[0]) - Number(b[0]));

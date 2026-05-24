@@ -109,8 +109,8 @@ export const Marketbar = ({ market }: MarketbarProps) => {
       {error ? (
         <div className="text-sm text-red-300">{error}</div>
       ) : (
-        <div className="flex min-w-max items-center gap-5">
-          <TickerStat
+        <div className="flex min-w-max  items-center gap-5">
+          <TickerStat 
             label="24h Change"
             value={formatPercent(tickerData?.priceChangePercent)}
             valueClassName={changeClass}
