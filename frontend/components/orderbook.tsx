@@ -118,7 +118,7 @@ export const Orderbook = ({ market }: OrderbookProps) => {
   const visibleBids = bids.slice(0, MAX_VISIBLE_LEVELS);
 
   return (
-    <section className="flex h-full min-h-[360px] w-full max-w-[360px] flex-col rounded-lg border border-[#20212a] bg-[#101116] text-sm text-slate-200 shadow-sm">
+    <section className="flex h-full min-h-[300px] w-full max-w-[360px] flex-col rounded-lg border border-[#20212a] bg-[#101116] text-sm text-slate-200 shadow-sm">
       <div className="flex items-center justify-between border-b border-[#20212a] px-3 py-2">
         <h2 className="text-sm font-semibold text-white">Order Book</h2>
         <span className="text-xs uppercase text-slate-500">{market}</span>
