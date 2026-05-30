@@ -11,6 +11,7 @@ export type Msgfromclient = {
 } | {
     type: typeof CANCEL_ORDER,
     data   : {
+        market: string,
         orderId: string,
         userId: string
     }
