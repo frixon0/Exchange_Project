@@ -86,12 +86,12 @@ export class Orderbook {
     matchBid(order: Order): {fills: Fill[], executedQty: number} {
         const fills: Fill[] = [];
         let executedQty = 0;
-
+        
         for (let i = 0; i < this.asks.length; i++) {
             const ask = this.asks[i];
             if (!ask) continue;
-            if (ask.price <= order.price && executedQty < order.quantity) {
-                const filledQty = Math.min((order.quantity - executedQty), ask.quantity);
+            if (ask.price <= order.price && executedQty < order.quantity&&ask.userId !== order.userId) {
+                const filledQty = Math.min((order.quantity - executedQty), ask.quantity-ask.filled);
                 executedQty += filledQty;
                 ask.filled += filledQty;
                 fills.push({
@@ -124,8 +124,8 @@ export class Orderbook {
         for (let i = 0; i < this.bids.length; i++) {
             const bid = this.bids[i];
             if (!bid) continue;
-            if (bid.price >= order.price && executedQty < order.quantity) {
-                const amountRemaining = Math.min(order.quantity - executedQty, bid.quantity);
+            if (bid.price >= order.price && executedQty < order.quantity&&bid.userId !== order.userId) {
+                const amountRemaining = Math.min(order.quantity - executedQty, bid.quantity-bid.filled);
                 executedQty += amountRemaining;
                 bid.filled += amountRemaining;
                 fills.push({

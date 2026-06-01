@@ -203,7 +203,7 @@ export class Engine {
         }
 
         this.checkAndLockFunds(baseAsset, quoteAsset, side, userId, quoteAsset, price, quantity);
-
+            
         const order: Order = {
             price: Number(price),
             quantity: Number(quantity),
