@@ -21,7 +21,7 @@ export type Msgfromclient = {
     data    : {
         userId: string, 
         amount: number,
-        currency: string
+        
     }   
 
 }

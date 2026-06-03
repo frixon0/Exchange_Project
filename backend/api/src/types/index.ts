@@ -40,4 +40,11 @@ export type MessageFromOrderbook = {
         side: "buy" | "sell",
         userId: string
     }[]
+} |{
+    type:"ON_RAMP",
+    payload:{
+        userId:string,
+        amount_updated:number,
+        total_balance:number
+    }
 }

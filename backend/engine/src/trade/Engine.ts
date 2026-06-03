@@ -155,9 +155,21 @@ export class Engine {
                 }
                 break;
             case ON_RAMP:
+                try{
                 const userId = message.data.userId;
                 const amount = Number(message.data.amount);
-                this.onRamp(userId, amount);
+                const {amount_updated,total_balance} =  this.onRamp(userId, amount);
+                RedisManager.getInstance().sendtoAPI(clientId,{
+                    type : "ON_RAMP",
+                    payload:{
+                        userId:clientId,
+                        amount_updated:amount_updated,
+                        total_balance:total_balance
+                    }
+                })}
+                catch(e){
+                    console.log(e);
+                }
                 break;
             case GET_DEPTH:
                 try {
@@ -410,6 +422,8 @@ export class Engine {
             userBalance[BASE_CURRENCY].available += amount;
            
         }
+        //@ts-ignore
+        return {amount_updated:amount,total_balance:userBalance[BASE_CURRENCY].available}
     }
 
     setBaseBalances() {

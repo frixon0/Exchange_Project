@@ -20,7 +20,7 @@ export type MsgToEngine = {
     data    : {
         userId: string, 
         amount: number,
-        currency: string
+        
     }   
 
 }

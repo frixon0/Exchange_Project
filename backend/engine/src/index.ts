@@ -15,7 +15,7 @@ while(true)
     }
     else
     {
-        const {message, clientId} = JSON.parse(res);
+        const {clientId, message} = JSON.parse(res);
         engine.process({message, clientId});
 
         //push to engine

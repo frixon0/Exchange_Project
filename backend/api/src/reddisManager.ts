@@ -22,7 +22,7 @@ export class RedisManager {
             this.client.subscribe(id, (message) => {
                 resolve(JSON.parse(message));
             });
-            this.publisher.publish("requests", JSON.stringify({ id, message }));
+            this.publisher.lPush("messages", JSON.stringify({ clientId:id, message }));
         });
     }
 }
