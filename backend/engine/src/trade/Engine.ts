@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import { RedisManager } from "../ReddisManager";
 import { ORDER_UPDATE, TRADE_ADDED } from "../types/index";
-import { CANCEL_ORDER, CREATE_ORDER, GET_DEPTH, GET_OPEN_ORDERS,  ON_RAMP } from "../types/to";
+import { CANCEL_ORDER, CREATE_ORDER, GET_BALANCE, GET_DEPTH, GET_OPEN_ORDERS,  ON_RAMP } from "../types/to";
 import { Msgfromclient } from "../types/recieve";
 import { Fill, Order, Orderbook } from "./orderbook";
 
@@ -10,7 +10,7 @@ export const BASE_CURRENCY = "INR";
 
 interface UserBalance {
     [key: string]: {
-        available: number;
+        available: number ;
         locked: number;
     }
 }
@@ -197,9 +197,34 @@ export class Engine {
                     });
                 }
                 break;
+            case GET_BALANCE:
+                try {
+                    const userId = message.data.userId;
+                    const asset = message.data.Asset;
+                    const balance = this.getBalance(userId,asset);
+                    RedisManager.getInstance().sendtoAPI(clientId,{
+                        type:"USER_BALANCE",
+                        payload:{
+                            user_balance:balance
+                        }
+                    })
+                } catch (e) {
+                    console.log(e);
+                }
         }
     }
+    getBalance(userId:string,asset:string){
+        if(this.balances.get(userId))
+        {
+            //@ts-ignore
+            const marketBalance = this.balances.get(userId)[asset]?.available || 0;
+            return marketBalance;
+        }
+        else{
+            return 0;
+        }
 
+    }
     addOrderbook(orderbook: Orderbook) {
         this.orderbooks.push(orderbook);
     }

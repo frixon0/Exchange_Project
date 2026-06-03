@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { RedisManager } from "../reddisManager";
-import { CANCEL_ORDER, CREATE_ORDER, GET_OPEN_ORDERS, ON_RAMP } from "../types";
+import { CANCEL_ORDER, CREATE_ORDER, GET_BALANCE, GET_OPEN_ORDERS, ON_RAMP } from "../types";
 export const orderRouter =Router();
 orderRouter.post("/",async(req,res)=>{
     const {market,side,price,quantity,userId} = req.body;
@@ -48,4 +48,17 @@ orderRouter.get("/on_ramp",async(req,res)=>{
         }
     })
     res.json(response.payload);
+})
+orderRouter.get("/balance",async(req,res)=>{
+    const userId = req.body();
+    const currency= req.body();
+    const response = await RedisManager.getInstance().sendAndAwait({
+        type:GET_BALANCE,
+        data:{
+            userId:userId,
+            Asset:currency
+        }
+        
+    })
+    res.json(response.payload)
 })

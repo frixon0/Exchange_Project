@@ -1,4 +1,4 @@
-import { CREATE_ORDER, CANCEL_ORDER, ON_RAMP, GET_DEPTH, GET_OPEN_ORDERS } from "./to";
+import { CREATE_ORDER, CANCEL_ORDER, ON_RAMP, GET_DEPTH, GET_OPEN_ORDERS,GET_BALANCE} from "./to";
 export type Msgfromclient = {
     type: typeof CREATE_ORDER,
     data: {
@@ -36,4 +36,10 @@ export type Msgfromclient = {
     data: {
         market: string
     }
-}   
+}|{
+    type: typeof GET_BALANCE,
+    data:{
+        userId:string,
+        Asset:string
+    }
+} 
