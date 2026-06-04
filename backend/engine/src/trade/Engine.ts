@@ -117,6 +117,15 @@ export class Engine {
                         }
                     }
 
+                    RedisManager.getInstance().pushMessage({
+                        type: ORDER_UPDATE,
+                        data: {
+                            orderId,
+                            executedQty: 0,
+                            status: "cancelled"
+                        }
+                    });
+
                     RedisManager.getInstance().sendtoAPI(clientId, {
                         type: "ORDER_CANCELLED",
                         payload: {

@@ -1,6 +1,9 @@
 
-## TODOS
- - Capture the DB events other than the trade events  
-    - Order information. As orders move off of orderbooks, they should be present in databases
-    - Ticker information. There should be a `ticker` table that stores the current price
-    - Trades information. User should be able to see the recent set of trades
+## DB processor
+
+The DB worker consumes messages from the Redis `db_processor` queue and persists:
+
+- `trades`: every executed trade, including market, price, quantity, quote quantity, timestamp, and maker side.
+- `orders`: order state from `ORDER_UPDATE` events, including executed quantity and status.
+- `tickers`: latest price per market, updated from each trade.
+- `klines_1m`, `klines_1h`, `klines_1w`: materialized views generated from trades for chart candles.
