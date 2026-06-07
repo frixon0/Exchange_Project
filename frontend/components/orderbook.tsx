@@ -80,7 +80,7 @@ export const Orderbook = ({ market }: OrderbookProps) => {
     }, market);
     sigManager.getInstance().sendMessage({
       method: "SUBSCRIBE",
-      params: [`depth.${market}`, `bookTicker.${market}`],
+      params: [`depth@${market}`],
     });
 
     getDepth(market)
@@ -105,7 +105,7 @@ export const Orderbook = ({ market }: OrderbookProps) => {
       sigManager.getInstance().deregister("bookTicker", market);
       sigManager.getInstance().sendMessage({
         method: "UNSUBSCRIBE",
-        params: [`depth.${market}`, `bookTicker.${market}`],
+        params: [`depth@${market}`],
       });
     };
   }, [market]);

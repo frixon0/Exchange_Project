@@ -1,14 +1,16 @@
 export interface depth{
     bids:[string,string][],
     asks:[string,string][],
-    lastUpdateId:string
+    market?: string,
+    lastUpdateId?:string
 }
 export interface trades{
-    id:number,
+    id:string,
+    market:string,
+    time:string,
     price:string,
-    qty:string,
-    quoteQty:string,
-    timestamp: number,
+    quantity:string,
+    quoteQuantity:string,
     isBuyerMaker: boolean    
 }
 export interface KLine {
@@ -24,16 +26,16 @@ export interface KLine {
 }
 
 export interface Ticker {
-    "firstPrice": string,
-    "high": string,
-    "lastPrice": string,
-    "low": string,
-    "priceChange": string,
-    "priceChangePercent": string,
-    "quoteVolume": string,
-    "symbol": string,
-    "trades": string,
-    "volume": string
+    firstPrice?: string,
+    high?: string,
+    lastPrice: string,
+    low?: string,
+    priceChange?: string,
+    priceChangePercent?: string,
+    quoteVolume: string,
+    symbol: string,
+    trades?: string,
+    volume: string
 }
 
 export interface BookTicker {

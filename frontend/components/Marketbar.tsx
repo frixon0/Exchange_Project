@@ -56,7 +56,7 @@ export const Marketbar = ({ market }: MarketbarProps) => {
     }, market); 
     sigManager.getInstance().sendMessage({
       "method": "SUBSCRIBE",
-      "params": [`ticker.${market}`, `trade.${market}`]
+      "params": [`trade@${market}`]
     });
     getticker(market)
       .then((data) => {
@@ -77,7 +77,7 @@ export const Marketbar = ({ market }: MarketbarProps) => {
       sigManager.getInstance().deregister("trade", market);
       sigManager.getInstance().sendMessage({
         method: "UNSUBSCRIBE",
-        params: [`ticker.${market}`, `trade.${market}`],
+        params: [`trade@${market}`],
        
       });
     };

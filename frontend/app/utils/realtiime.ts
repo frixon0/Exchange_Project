@@ -1,6 +1,6 @@
 import { BookTicker, depth, KLine, Ticker } from "./types";
 
-const BASE_URL = 'wss://ws.backpack.exchange/'
+const BASE_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8081'
 
 type CallbackEntry = {
     callback: (data: unknown) => void;
@@ -43,7 +43,7 @@ export class sigManager {
     private isConnected: boolean = false;
     private callbacks: Record<string, CallbackEntry[]> = {};
     private constructor() {
-        console.info("Backpack websocket creating", BASE_URL);
+        console.info("Exchange websocket creating", BASE_URL);
         this.ws = new WebSocket(BASE_URL);
         this.bufferedmessages = [];
         this.init();
@@ -56,20 +56,20 @@ export class sigManager {
     }
     init(){
         this.ws.onopen = () => {
-            console.info("Backpack websocket opened");
+            console.info("Exchange websocket opened");
             this.isConnected = true;
             this.bufferedmessages.forEach((message) => {
-                console.info("Backpack websocket sending buffered message", message);
+                console.info("Exchange websocket sending buffered message", message);
                 this.ws.send(message);
             });
             this.bufferedmessages = [];
         };
         this.ws.onmessage = (event) => {
-            console.info("Backpack websocket received", event.data);
+            console.info("Exchange websocket received", event.data);
             const message = JSON.parse(event.data) as StreamMessage;
             const data = message.data ?? message;
-            const type = data.e ?? message.stream?.split(".")[0];
-            console.info("Backpack websocket event type", type);
+            const type = data.e ?? message.stream?.split("@")[0]?.split(".")[0];
+            console.info("Exchange websocket event type", type);
             if (type && this.callbacks[type]) {
                 this.callbacks[type].forEach((cb) => {
                     if(type==='ticker') {
@@ -143,30 +143,30 @@ export class sigManager {
             }
     };
         this.ws.onerror = (event) => {
-            console.error("Backpack websocket error", event);
+            console.error("Exchange websocket error", event);
         };
         this.ws.onclose = (event) => {
             this.isConnected = false;
-            console.warn("Backpack websocket closed", event.code, event.reason);
+            console.warn("Exchange websocket closed", event.code, event.reason);
         };
     }
     sendMessage(message: SubscriptionMessage) {
         const messageToSend = JSON.stringify(message);
         if (!this.isConnected) {
-            console.info("Backpack websocket buffering message", messageToSend);
+            console.info("Exchange websocket buffering message", messageToSend);
             this.bufferedmessages.push(messageToSend);
             return;
         }
-        console.info("Backpack websocket sending message", messageToSend);
+        console.info("Exchange websocket sending message", messageToSend);
         this.ws.send(messageToSend);
     }
     async register<T>(type:string ,callback: (data: T) => void,id:string) {
-        console.info("Backpack websocket registering callback", type, id);
+        console.info("Exchange websocket registering callback", type, id);
         this.callbacks[type] = this.callbacks[type] || [];
         this.callbacks[type].push({ callback: callback as (data: unknown) => void,id  });
     }
     async deregister(type:string ,id:string) {
-        console.info("Backpack websocket deregistering callback", type, id);
+        console.info("Exchange websocket deregistering callback", type, id);
         if (this.callbacks[type]) {
             this.callbacks[type] = this.callbacks[type].filter((cb: { id: string }) => cb.id !== id);
         }

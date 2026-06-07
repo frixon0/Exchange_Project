@@ -18,8 +18,8 @@ interface UserBalance {
 export class Engine {
     private orderbooks: Orderbook[] = [];
     private balances: Map<string, UserBalance> = new Map();
-
-    constructor() {
+    private static instance:Engine
+    private constructor() {
         let snapshot = null
         try {
             if (globalThis.process.env.WITH_SNAPSHOT) {
@@ -41,7 +41,12 @@ export class Engine {
             this.saveSnapshot();
         }, 1000 * 3);
     }
-
+    public static getinstance(){
+        if(!this.instance){
+            this.instance =new Engine()
+        }
+        return this.instance
+    }
     saveSnapshot() {
         const snapshotSnapshot = {
             orderbooks: this.orderbooks.map(o => o.getSnapshot()),
@@ -493,6 +498,27 @@ export class Engine {
                 locked: 0
             }
         });
+        this.balances.set("6", {
+            [BASE_CURRENCY]: {
+                available: 100000000,
+                locked: 0
+            },
+            "TATA": {
+                available: 100000000,
+                locked: 0
+            }
+        });
+        this.balances.set("7", {
+            [BASE_CURRENCY]: {
+                available: 100000000,
+                locked: 0
+            },
+            "TATA": {
+                available: 100000000,
+                locked: 0
+            }
+        });
+
     }
 
 }

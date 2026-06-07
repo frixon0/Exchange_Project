@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = process.env.API_BASE_URL || "http://localhost:3010";
 const TOTAL_BIDS = 15;
 const TOTAL_ASK = 15;
 const MARKET = "TATA_INR";
@@ -55,7 +55,8 @@ async function cancelBidsMoreThan(openOrders: any[], price: number) {
             promises.push(axios.delete(`${BASE_URL}/api/v1/order`, {
                 data: {
                     orderId: o.orderId,
-                    market: MARKET
+                    market: MARKET,
+                    userId: USER_ID
                 }
             }));
         }
@@ -71,7 +72,8 @@ async function cancelAsksLessThan(openOrders: any[], price: number) {
             promises.push(axios.delete(`${BASE_URL}/api/v1/order`, {
                 data: {
                     orderId: o.orderId,
-                    market: MARKET
+                    market: MARKET,
+                    userId: USER_ID
                 }
             }));
         }

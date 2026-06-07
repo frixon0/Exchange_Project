@@ -17,10 +17,20 @@ orderRouter.post("/",async(req,res)=>{
     res.json(response.payload);
 })
 orderRouter.delete("/",async(req,res)=>{
-    const {orderId, userId }= req.body();
+    const { orderId, userId, market } = req.body as {
+        orderId?: string;
+        userId?: string;
+        market?: string;
+    };
+
+    if (!orderId || !userId || !market) {
+        res.status(400).json({ error: "orderId, userId and market are required" });
+        return;
+    }
     const response =  await RedisManager.getInstance().sendAndAwait({
         type:CANCEL_ORDER,
         data:{
+            market,
             orderId,
             userId
         }
@@ -39,7 +49,7 @@ orderRouter.get("/open",async(req,res)=>{
     res.json(response.payload);
 })
 orderRouter.get("/on_ramp",async(req,res)=>{
-    const {userId,amount} =req.body();
+    const {userId,amount} =req.body;
     const response = await RedisManager.getInstance().sendAndAwait({
         type:ON_RAMP,
         data:{
@@ -50,8 +60,8 @@ orderRouter.get("/on_ramp",async(req,res)=>{
     res.json(response.payload);
 })
 orderRouter.get("/balance",async(req,res)=>{
-    const userId = req.body();
-    const currency= req.body();
+    const userId = req.body;
+    const currency= req.body;
     const response = await RedisManager.getInstance().sendAndAwait({
         type:GET_BALANCE,
         data:{

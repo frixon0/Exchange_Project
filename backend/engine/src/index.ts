@@ -3,7 +3,7 @@ import { createClient } from "redis";
 import { Engine } from "./trade/Engine";
 
 async function main(){
-const engine = new Engine();
+ const engine = Engine.getinstance();
 const client:RedisClientType = createClient();
 await client.connect();
 while(true)

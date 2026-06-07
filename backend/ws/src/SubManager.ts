@@ -21,10 +21,10 @@ export class SubManager{
         if(!this.subscriptions.get(userId)?.includes(stream))
         {
             const connec_streams = this.subscriptions.get(userId) || [];
-            connec_streams.concat(stream);
+            connec_streams.push(stream);
             this.subscriptions.set(userId,connec_streams);
             const connec_users = this.channeldetail.get(stream) || [];
-            connec_users.concat(userId);
+            connec_users.push(userId);
             this.channeldetail.set(stream,connec_users);
             if(this.channeldetail.get(stream)?.length=== 1)
             {
